@@ -1,14 +1,25 @@
+from Tools.scripts.pindent import complete_string
 from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 from datetime import datetime
 import pyodbc
+import os
+from dotenv import load_dotenv
 
-# # Função para consultar dados do banco de dados
+
+# Carregar variáveis do .env
+load_dotenv()
+
+# Função para consultar dados do banco de dados
 def consulta_dados(cgcclient):
+    # Usar variáveis de ambiente para conectar ao banco de dados
     conexao = pyodbc.connect(
-        'DRIVER={ODBC Driver 17 for SQL Server};SERVER=RECN100100309\\SQLEXPRESS;DATABASE=protheus1212210;UID=sa;PWD=250900'
+        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+        f"SERVER={os.getenv('DB_SERVER')}\\SQLEXPRESS;"
+        f"DATABASE={os.getenv('DB_DATABASE')};"
+        f"UID={os.getenv('DB_USERNAME')};"
+        f"PWD={os.getenv('DB_PASSWORD')}"
     )
-
     newcgcclient = cgcclient[:8]
 
     cursor = conexao.cursor()
