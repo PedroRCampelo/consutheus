@@ -1,11 +1,8 @@
-from Tools.scripts.pindent import complete_string
-from flask import Flask, request
-from twilio.twiml.messaging_response import MessagingResponse
 from datetime import datetime
 import pyodbc
 import os
 from dotenv import load_dotenv
-
+from replies import *
 
 # Carregar variáveis do .env
 load_dotenv()
@@ -20,8 +17,8 @@ def consulta_dados(cgcclient):
         f"UID={os.getenv('DB_USERNAME')};"
         f"PWD={os.getenv('DB_PASSWORD')}"
     )
-    newcgcclient = cgcclient[:8]
 
+    newcgcclient = cgcclient[:8]
     cursor = conexao.cursor()
     cursor.execute(f"SELECT E1_VENCREA, E1_VALOR, E1_NOMCLI, E1_NUM, E1_PARCELA FROM SE1990 WHERE E1_CLIENTE = {newcgcclient}")
     dados = cursor.fetchall()
@@ -37,29 +34,7 @@ def consulta_dados(cgcclient):
                            f"Valor: R${linha[1]:.2f}\n "
                 for index, linha in enumerate(dados)]))
 
-    return response
-
-
-app = Flask(__name__)
-
-@app.route('/', methods=['GET'])
-def index():
-    return "API do bot está funcionando!"
-
-@app.route('/bot', methods=['POST'])
-def bot():
-    resp = MessagingResponse()
-    msg = resp.message()
-    # msg.body("Digite o seu CNPJ ou CPF (Sem . / -)")
-
-    original_msg = request.values.get('Body', '') # Mensagem do cliente
-    msg.body(consulta_dados(original_msg)) # Retorno ao cliente
-
-    consulta_dados(original_msg)
-    return str(resp)
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-
-
+    if len(response) >= 1600:
+        return Replies.ERROR_LENGTH
+    else:
+        return response
